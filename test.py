@@ -1,6 +1,6 @@
-import project
+import biogonzales
 
-p = project.Project()
+p = biogonzales.Project()
 
 print p.analysis_version
 print p.conf()
