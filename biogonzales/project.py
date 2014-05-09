@@ -14,6 +14,7 @@ class Project:
         self.log = self._init_log()
         self.log.info("invoked")
         self.config = None
+        self._cache_conf()
 
     def _init_av(self):
         av = "."
@@ -41,7 +42,6 @@ class Project:
         return p
 
     def conf(self, *keys):
-        self._cache_conf()
         c = self.config
         has_keys = False
         for k in keys:
@@ -59,12 +59,12 @@ class Project:
     def _cache_conf(self):
         if not self.config is None:
             return
-        if not os.path.exists(self.config_file):
-            return
-        with open(self.config_file, 'r') as f:
-            conf = yaml.load(f)
-        if not type(conf) is dict:
-            raise TypeError("".join(["configuration file >> ", self.config_file, " << is not a hash/dictionary"]))
+        if os.path.exists(self.config_file):
+            with open(self.config_file, 'r') as f:
+                conf = yaml.load(f)
+            if not type(conf) is dict:
+                raise TypeError("".join(["configuration file >> ", self.config_file, " << is not a hash/dictionary"]))
+            self.log.info("".join(["reading >> ", self.config_file, " <<"]))
 
         av_config_file = ".".join([self.analysis_version, "conf", "yml"])
         if os.path.exists(av_config_file):
@@ -73,6 +73,8 @@ class Project:
             if not type(av_conf) is dict:
                 raise TypeError("".join(["configuration file >> ", av_config_file, " << is not a hash/dictionary"]))
             conf.update(av_conf)
+            self.log.info("".join(["reading >> ", av_config_file, " <<"]))
+
         self.config = self._visit_conf(conf)
         return
 
