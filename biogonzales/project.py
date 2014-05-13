@@ -91,6 +91,8 @@ class Project:
 
     def _visit_conf(self, it):
         if isinstance(it, str):
+            if not re.match(r"^~[^/]*/", it) is None:
+                it = os.path.expanduser(it)
             it = it.replace('__av__', self.analysis_version)
             m = re.match(r"__path_to\(([^)]+)\)__", it)
             if not m is None:
