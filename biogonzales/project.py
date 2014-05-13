@@ -4,15 +4,17 @@ import logging
 import yaml
 import re
 import json
+import sys
 
 class Project:
-    def __init__(self, config_file = "gonz.conf.yml", merge_av_config = True ):
+    def __init__(self, config_file = "gonz.conf.yml", merge_av_config = True, namespace=None):
         self.config_file = config_file
         self.merge_av_config = merge_av_config
+        self.namespace = namespace
         self.project_dir = os.path.join("..", "..")
         self.analysis_version = self._init_av()
         self.log = self._init_log()
-        self.log.info("invoked")
+        self.log.info("".join(["invoked (", self.analysis_version, ")"]))
         self.config = None
         self._cache_conf()
 
@@ -82,8 +84,13 @@ class Project:
         logging.addLevelName(30, "WARN")
         log = logging.getLogger('biogonzales')
         hdlr = logging.FileHandler(self._nfi('gonz.log'))
-        formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(module)s: %(message)s',
-                datefmt="%Y-%m-%d %H:%M:%S")
+        if self.namespace is None:
+            try:
+                self.namespace = os.path.basename(sys.argv[0])
+            except NameError:
+                self.namespace = "interactive"
+
+        formatter = logging.Formatter("".join(["[%(asctime)s] [%(levelname)s] ", self.namespace, ": %(message)s"]), datefmt="%Y-%m-%d %H:%M:%S")
         hdlr.setFormatter(formatter)
         log.addHandler(hdlr)
         log.setLevel(logging.INFO)
